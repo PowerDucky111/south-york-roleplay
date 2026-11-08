@@ -1,8 +1,8 @@
 {
-  "name": "south-york-roleplay-cms",
+  "name": "south-york-roleplay",
   "version": "1.0.0",
   "private": true,
-  "description": "Community management system for South York Roleplay (FiveM)",
+  "description": "Community management system for South York Roleplay",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
