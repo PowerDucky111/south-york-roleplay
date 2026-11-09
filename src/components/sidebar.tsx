@@ -4,66 +4,100 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
-const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-  { href: "/members", label: "Members", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
-  { href: "/roles", label: "Roles", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-  { href: "/moderation", label: "Moderation", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
+type NavItem = { href: string; label: string; icon: string };
+const PLAYER_NAV: NavItem[] = [
+  { href: "/portal", label: "Overview", icon: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" },
+  { href: "/portal/applications", label: "My applications", icon: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" },
+  { href: "/portal/tickets", label: "Support tickets", icon: "M4 5h16v11H8l-4 4zM8 9h8M8 12h5" },
+];
+const STAFF_NAV: NavItem[] = [
+  { href: "/dashboard", label: "Overview", icon: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" },
+  { href: "/members", label: "Discord members", icon: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M20 8v6M23 11h-6" },
+  { href: "/roles", label: "Discord roles", icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7zM9 12l2 2 4-4" },
+  { href: "/moderation", label: "Moderation", icon: "M12 9v2m0 4h.01M5 20h14a2 2 0 001.7-3L13.7 4a2 2 0 00-3.4 0L3.3 17A2 2 0 005 20z" },
 ];
 
-export function Sidebar({ username, avatarUrl }: { username: string; avatarUrl: string }) {
+export function Sidebar({
+  username,
+  avatarUrl,
+  mode = "staff",
+}: {
+  username: string;
+  avatarUrl: string;
+  mode?: "staff" | "player";
+}) {
   const pathname = usePathname();
+  const nav = mode === "staff" ? STAFF_NAV : PLAYER_NAV;
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-white/5 bg-discord-dark">
-      <div className="flex items-center gap-3 border-b border-white/5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-discord-blurple text-sm font-bold text-white">
+    <aside className="relative z-10 flex min-h-screen w-full shrink-0 flex-col border-b border-white/[0.07] bg-[#101a2b] lg:sticky lg:top-0 lg:h-screen lg:w-[270px] lg:border-b-0 lg:border-r">
+      <div className="flex items-center gap-3 border-b border-white/[0.07] px-6 py-6">
+        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-sky-500 to-blue-700 text-sm font-black tracking-tight text-white shadow-lg shadow-blue-950/40">
           SY
         </div>
-        <div>
-          <div className="text-sm font-bold text-white">South York RP</div>
-          <div className="text-xs text-discord-muted">Staff CMS</div>
+        <div className="min-w-0">
+          <div className="truncate text-sm font-bold tracking-wide text-white">SOUTH YORK RP</div>
+          <div className="mt-0.5 text-xs text-slate-400">
+            {mode === "staff" ? "Management portal" : "Community portal"}
+          </div>
         </div>
       </div>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {NAV.map((item) => {
-          const active = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
-                active
-                  ? "bg-discord-blurple/15 text-white"
-                  : "text-discord-muted hover:bg-discord-hover hover:text-white"
-              )}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d={item.icon} />
-              </svg>
-              {item.label}
-            </Link>
-          );
-        })}
-      </nav>
+      <div className="px-5 pt-6">
+        <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">
+          {mode === "staff" ? "Staff workspace" : "Your space"}
+        </div>
+        <nav className="space-y-1">
+          {nav.map((item) => {
+            const active = item.href === "/portal"
+              ? pathname === "/portal"
+              : pathname === item.href || pathname.startsWith(item.href + "/");
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={cn(
+                  "group flex items-center gap-3 rounded-xl px-3.5 py-3 text-[13px] font-medium transition",
+                  active
+                    ? "bg-blue-500/15 text-blue-200 ring-1 ring-inset ring-blue-400/20"
+                    : "text-slate-400 hover:bg-white/[0.05] hover:text-slate-100"
+                )}
+              >
+                <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                  <path d={item.icon} />
+                </svg>
+                {item.label}
+                {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-sky-300" />}
+              </Link>
+            );
+          })}
+        </nav>
+      </div>
 
-      <div className="border-t border-white/5 p-4">
+      {mode === "staff" && (
+        <div className="mt-8 px-5">
+          <div className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Community</div>
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.025] p-4">
+            <div className="flex items-center gap-2 text-xs font-semibold text-slate-200">
+              <span className="h-2 w-2 rounded-full bg-emerald-400" />
+              Discord connection
+            </div>
+            <p className="mt-1.5 text-xs leading-5 text-slate-500">Server tools are connected through your configured Discord bot.</p>
+          </div>
+        </div>
+      )}
+
+      <div className="mt-auto border-t border-white/[0.07] p-5">
         <div className="flex items-center gap-3">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full" />
+          <img src={avatarUrl} alt="" className="h-10 w-10 rounded-full bg-slate-800 ring-2 ring-white/10" />
           <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium text-white">{username}</div>
-            <div className="text-xs text-discord-muted">Staff</div>
+            <div className="truncate text-sm font-semibold text-white">{username}</div>
+            <div className="mt-0.5 text-xs text-slate-500">{mode === "staff" ? "Staff workspace" : "Community member"}</div>
           </div>
           <form action="/api/auth/logout" method="post">
-            <button
-              type="submit"
-              title="Sign out"
-              className="rounded-md p-1.5 text-discord-muted transition hover:bg-discord-hover hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+            <button type="submit" title="Sign out" className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-white">
+              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                 <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
             </button>
