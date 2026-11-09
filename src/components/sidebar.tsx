@@ -12,6 +12,7 @@ const PLAYER_NAV: NavItem[] = [
 ];
 const STAFF_NAV: NavItem[] = [
   { href: "/dashboard", label: "Overview", icon: "M3 3h7v7H3zM14 3h7v7h-7zM14 14h7v7h-7zM3 14h7v7H3z" },
+  { href: "/applications", label: "Applications", icon: "M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" },
   { href: "/members", label: "Discord members", icon: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2M9 11a4 4 0 100-8 4 4 0 000 8M20 8v6M23 11h-6" },
   { href: "/roles", label: "Discord roles", icon: "M12 3l8 4v5c0 5-3.5 8-8 9-4.5-1-8-4-8-9V7zM9 12l2 2 4-4" },
   { href: "/moderation", label: "Moderation", icon: "M12 9v2m0 4h.01M5 20h14a2 2 0 001.7-3L13.7 4a2 2 0 00-3.4 0L3.3 17A2 2 0 005 20z" },
