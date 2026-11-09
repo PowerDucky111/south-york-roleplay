@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "South York Roleplay — Staff CMS",
-  description: "Community management system for South York Roleplay",
+  title: "South York Roleplay — Community Portal",
+  description: "Applications, support and community services for South York Roleplay",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
