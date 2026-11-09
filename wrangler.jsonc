@@ -19,6 +19,13 @@
 			"service": "south-york-roleplay"
 		}
 	],
+	"d1_databases": [
+		{
+			"binding": "DB",
+			"database_name": "syrp-community",
+			"database_id": "1b1a7fff-8c7a-4144-91ca-6b3fdd1518db"
+		}
+	],
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
