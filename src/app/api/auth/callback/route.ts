@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
 import { isAdmin } from "@/lib/auth";
+import { getMember } from "@/lib/discord";
 import { appUrl } from "@/lib/utils";
 import type { DiscordUser } from "@/lib/discord";
 
@@ -26,7 +27,6 @@ export async function GET(req: NextRequest) {
     return fail("missing_oauth_config");
   }
 
-  // Exchange the code for an access token.
   const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
     method: "POST",
     headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -42,21 +42,23 @@ export async function GET(req: NextRequest) {
   if (!tokenRes.ok) return fail("token_exchange_failed");
   const tokenData = await tokenRes.json();
 
-  // Fetch the user's profile.
   const userRes = await fetch("https://discord.com/api/users/@me", {
     headers: { Authorization: `Bearer ${tokenData.access_token}` },
   });
   if (!userRes.ok) return fail("profile_fetch_failed");
   const user = (await userRes.json()) as DiscordUser;
 
-  // Only staff (admins) may enter the CMS.
-  if (!(await isAdmin(user.id))) {
-    return fail("not_authorized");
+  // The bot verifies that the account belongs to this community. Panel
+  // permissions are being moved into the portal database in a later stage.
+  try {
+    await getMember(user.id);
+  } catch {
+    return fail("not_member");
   }
 
   await createSession(user);
-
-  const res = NextResponse.redirect(`${appUrl()}/dashboard`);
+  const admin = await isAdmin(user.id);
+  const res = NextResponse.redirect(`${appUrl()}${admin ? "/dashboard" : "/portal"}`);
   res.cookies.delete("oauth_state");
   return res;
 }
