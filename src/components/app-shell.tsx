@@ -19,9 +19,24 @@ export function AppShell({
 
   return (
     <div className="flex min-h-screen">
-      <Sidebar username={session.username} avatarUrl={avatarUrl(user, 64)} />
-      <main className="flex-1 overflow-y-auto">
-        <div className="mx-auto max-w-6xl px-8 py-8">{children}</div>
+      <Sidebar username={session.username} avatarUrl={avatarUrl(user, 96)} />
+      <main className="min-w-0 flex-1">
+        <div className="mx-auto w-full max-w-[1500px] px-5 py-6 sm:px-8 sm:py-8 xl:px-10">
+          <div className="mb-8 flex flex-wrap items-center justify-between gap-3 border-b border-white/[0.07] pb-5">
+            <div>
+              <div className="syrp-kicker">South York Roleplay · Community systems</div>
+              <p className="mt-1 text-sm text-slate-400">A central place to manage the community</p>
+            </div>
+            <div className="flex items-center gap-2 rounded-full border border-emerald-400/15 bg-emerald-400/[0.07] px-3 py-1.5 text-xs font-medium text-emerald-300">
+              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+              Discord connected
+            </div>
+          </div>
+          {children}
+          <footer className="mt-12 border-t border-white/[0.06] pt-5 text-xs text-slate-500">
+            South York Roleplay · Community Portal
+          </footer>
+        </div>
       </main>
     </div>
   );
