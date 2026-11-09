@@ -5,70 +5,95 @@ import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 
 const NAV = [
-  { href: "/dashboard", label: "Dashboard", icon: "M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" },
-  { href: "/members", label: "Members", icon: "M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" },
-  { href: "/roles", label: "Roles", icon: "M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" },
-  { href: "/moderation", label: "Moderation", icon: "M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" },
+  {
+    title: "Workspace",
+    items: [
+      { href: "/dashboard", label: "Overview", icon: "M3 13h8V3H3v10zm10 8h8V11h-8v10zM13 3v6h8V3h-8zM3 21h8v-6H3v6z" },
+    ],
+  },
+  {
+    title: "Community",
+    items: [
+      { href: "/members", label: "Members", icon: "M16 21v-2a4 4 0 00-4-4H6a4 4 0 00-4 4v2m16 0h4v-2a4 4 0 00-3-3.87M9 11a4 4 0 100-8 4 4 0 000 8zm8-7.87a4 4 0 010 7.75" },
+      { href: "/roles", label: "Discord roles", icon: "M12 3l8 4v5c0 5-3.4 8-8 9-4.6-1-8-4-8-9V7l8-4zm-3 9l2 2 4-4" },
+    ],
+  },
+  {
+    title: "Administration",
+    items: [
+      { href: "/moderation", label: "Moderation", icon: "M12 9v2m0 4h.01M5 20h14a2 2 0 001.7-3L13.7 4a2 2 0 00-3.4 0L3.3 17A2 2 0 005 20z" },
+    ],
+  },
 ];
 
 export function Sidebar({ username, avatarUrl }: { username: string; avatarUrl: string }) {
   const pathname = usePathname();
 
   return (
-    <aside className="flex w-60 shrink-0 flex-col border-r border-white/5 bg-discord-dark">
-      <div className="flex items-center gap-3 border-b border-white/5 px-5 py-5">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-discord-blurple text-sm font-bold text-white">
+    <aside className="sticky top-0 flex h-screen w-[248px] shrink-0 flex-col border-r border-white/[0.07] bg-syrp-sidebar/95 backdrop-blur-xl max-lg:w-[76px]">
+      <Link href="/dashboard" className="flex items-center gap-3 border-b border-white/[0.07] px-5 py-6 max-lg:justify-center max-lg:px-2">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-blue-300/20 bg-gradient-to-br from-blue-500 to-blue-700 text-sm font-black tracking-tight text-white shadow-lg shadow-blue-950/40">
           SY
         </div>
-        <div>
-          <div className="text-sm font-bold text-white">South York RP</div>
-          <div className="text-xs text-discord-muted">Staff CMS</div>
+        <div className="min-w-0 max-lg:hidden">
+          <div className="truncate text-sm font-bold tracking-wide text-white">SOUTH YORK</div>
+          <div className="mt-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-500">Roleplay portal</div>
         </div>
-      </div>
+      </Link>
 
-      <nav className="flex-1 space-y-1 px-3 py-4">
-        {NAV.map((item) => {
-          const active = pathname.startsWith(item.href);
-          return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={cn(
-                "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition",
-                active
-                  ? "bg-discord-blurple/15 text-white"
-                  : "text-discord-muted hover:bg-discord-hover hover:text-white"
-              )}
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5 shrink-0" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d={item.icon} />
-              </svg>
-              {item.label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 space-y-7 overflow-y-auto px-3 py-6 max-lg:px-2">
+        {NAV.map((group) => (
+          <div key={group.title}>
+            <div className="mb-2 px-3 text-[10px] font-bold uppercase tracking-[0.18em] text-slate-600 max-lg:hidden">{group.title}</div>
+            <div className="space-y-1">
+              {group.items.map((item) => {
+                const active = pathname === item.href || pathname.startsWith(item.href + "/");
+                return (
+                  <Link
+                    key={item.href}
+                    href={item.href}
+                    title={item.label}
+                    className={cn(
+                      "group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition max-lg:justify-center max-lg:px-0",
+                      active
+                        ? "border border-blue-400/15 bg-blue-500/10 text-blue-200 shadow-sm shadow-blue-950/20"
+                        : "border border-transparent text-slate-400 hover:bg-white/[0.04] hover:text-white"
+                    )}
+                  >
+                    <svg viewBox="0 0 24 24" className="h-[18px] w-[18px] shrink-0" fill="none" stroke="currentColor" strokeWidth={1.7} strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                      <path d={item.icon} />
+                    </svg>
+                    <span className="max-lg:hidden">{item.label}</span>
+                    {active && <span className="ml-auto h-1.5 w-1.5 rounded-full bg-blue-300 max-lg:hidden" />}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      <div className="border-t border-white/5 p-4">
-        <div className="flex items-center gap-3">
+      <div className="border-t border-white/[0.07] p-3">
+        <div className="flex items-center gap-3 rounded-xl bg-white/[0.035] p-2.5 max-lg:justify-center max-lg:p-1.5">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full" />
-          <div className="min-w-0 flex-1">
-            <div className="truncate text-sm font-medium text-white">{username}</div>
-            <div className="text-xs text-discord-muted">Staff</div>
+          <img src={avatarUrl} alt="" className="h-9 w-9 rounded-full ring-2 ring-white/10" />
+          <div className="min-w-0 flex-1 max-lg:hidden">
+            <div className="truncate text-xs font-semibold text-slate-100">{username}</div>
+            <div className="mt-0.5 text-[10px] text-slate-500">Panel administrator</div>
           </div>
-          <form action="/api/auth/logout" method="post">
-            <button
-              type="submit"
-              title="Sign out"
-              className="rounded-md p-1.5 text-discord-muted transition hover:bg-discord-hover hover:text-white"
-            >
-              <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+          <form action="/api/auth/logout" method="post" className="max-lg:hidden">
+            <button type="submit" title="Sign out" className="rounded-lg p-2 text-slate-500 transition hover:bg-white/[0.06] hover:text-white">
+              <svg viewBox="0 0 24 24" className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+                <path d="M10 17l5-5-5-5m5 5H3m9-9h6a3 3 0 013 3v12a3 3 0 01-3 3h-6" />
               </svg>
             </button>
           </form>
         </div>
+        <form action="/api/auth/logout" method="post" className="mt-2 hidden max-lg:block">
+          <button type="submit" title="Sign out" className="flex w-full justify-center rounded-lg p-2 text-slate-500 hover:bg-white/[0.06] hover:text-white">
+            <svg viewBox="0 0 24 24" className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8}><path d="M10 17l5-5-5-5m5 5H3m9-9h6a3 3 0 013 3v12a3 3 0 01-3 3h-6" /></svg>
+          </button>
+        </form>
       </div>
     </aside>
   );
