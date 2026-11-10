@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 interface Ticket {
@@ -58,7 +59,7 @@ export function StaffTicketQueue() {
           {visible.map(ticket => <article key={ticket.id} className="panel-card p-5 sm:p-6">
             <div className="flex flex-wrap items-start justify-between gap-3">
               <div><p className="text-xs font-semibold text-blue-300">Ticket #{ticket.ticket_number} · {ticket.category.replace("-"," ")}</p><h2 className="mt-1 text-lg font-semibold text-white">{ticket.subject}</h2><p className="mt-1 text-xs text-slate-500">Opened by {ticket.owner_username ?? ticket.owner_discord_id} · {ticket.message_count} messages · {new Date(ticket.created_at).toLocaleDateString("en-GB")}</p></div>
-              {saving === ticket.id && <span className="text-xs text-slate-400">Saving…</span>}
+              <div className="flex items-center gap-3">{saving === ticket.id && <span className="text-xs text-slate-400">Saving…</span>}<Link href={`/tickets/${ticket.id}`} className="rounded-lg border border-blue-400/30 px-3 py-2 text-xs font-semibold text-blue-200 hover:bg-blue-400/10">Open ticket →</Link></div>
             </div>
             <div className="mt-5 grid gap-3 sm:grid-cols-3">
               <label className="text-xs text-slate-400">Status<select disabled={saving===ticket.id} value={ticket.status} onChange={e=>void update(ticket,{status:e.target.value})} className="mt-1 block w-full rounded-lg border border-white/10 bg-[#0b1627] px-3 py-2 text-sm text-white">{statuses.map(s=><option key={s} value={s}>{s.replace("_"," ")}</option>)}</select></label>
