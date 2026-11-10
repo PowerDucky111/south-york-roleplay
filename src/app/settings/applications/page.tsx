@@ -1,11 +1,11 @@
-import { requireAdminSession } from "@/lib/auth";
+import { requirePermissionSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { ApplicationSettings } from "@/components/application-settings";
 
 export const dynamic = "force-dynamic";
 
 export default async function ApplicationSettingsPage() {
-  const session = await requireAdminSession();
+  const session = await requirePermissionSession("applications.manage");
   return (
     <AppShell session={session}>
       <div className="eyebrow">Staff workspace / Settings</div>
