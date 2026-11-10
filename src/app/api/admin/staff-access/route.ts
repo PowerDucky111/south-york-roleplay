@@ -51,11 +51,15 @@ export async function PATCH(request:NextRequest) {
       const found=await db.prepare(`SELECT id FROM panel_roles WHERE id IN (${placeholders})`).bind(...roleIds).all<{id:string}>();
       if(found.results.length!==roleIds.length) return NextResponse.json({error:"One or more selected panel roles do not exist."},{status:400});
     }
-    await db.prepare("INSERT INTO panel_users (discord_user_id,username,avatar_hash) VALUES (?,?,?) ON CONFLICT(discord_user_id) DO UPDATE SET username=excluded.username,avatar_hash=excluded.avatar_hash,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(auth.session.userId,auth.session.username,auth.session.avatar).run();
-    await db.prepare("INSERT INTO panel_users (discord_user_id,username,avatar_hash) VALUES (?,?,?) ON CONFLICT(discord_user_id) DO UPDATE SET username=excluded.username,avatar_hash=excluded.avatar_hash,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(member.user.id,member.user.global_name??member.user.username,member.user.avatar).run();
-    await db.prepare("DELETE FROM panel_user_roles WHERE discord_user_id=?").bind(member.user.id).run();
-    for(const roleId of roleIds) await db.prepare("INSERT INTO panel_user_roles (discord_user_id,role_id,assigned_by) VALUES (?,?,?)").bind(member.user.id,roleId,auth.session.userId).run();
-    await db.prepare("INSERT INTO audit_logs (id,actor_discord_id,action,target_type,target_id,metadata_json) VALUES (?,?,'panel.roles.updated','panel_user',?,?)").bind(crypto.randomUUID(),auth.session.userId,member.user.id,JSON.stringify({roleIds})).run();
+    // Apply the user records, role replacement and audit event atomically.
+    const statements = [
+      db.prepare("INSERT INTO panel_users (discord_user_id,username,avatar_hash) VALUES (?,?,?) ON CONFLICT(discord_user_id) DO UPDATE SET username=excluded.username,avatar_hash=excluded.avatar_hash,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(auth.session.userId,auth.session.username,auth.session.avatar),
+      db.prepare("INSERT INTO panel_users (discord_user_id,username,avatar_hash) VALUES (?,?,?) ON CONFLICT(discord_user_id) DO UPDATE SET username=excluded.username,avatar_hash=excluded.avatar_hash,updated_at=strftime('%Y-%m-%dT%H:%M:%fZ','now')").bind(member.user.id,member.user.global_name??member.user.username,member.user.avatar),
+      db.prepare("DELETE FROM panel_user_roles WHERE discord_user_id=?").bind(member.user.id),
+      ...roleIds.map(roleId => db.prepare("INSERT INTO panel_user_roles (discord_user_id,role_id,assigned_by) VALUES (?,?,?)").bind(member.user!.id,roleId,auth.session.userId)),
+      db.prepare("INSERT INTO audit_logs (id,actor_discord_id,action,target_type,target_id,metadata_json) VALUES (?,?,'panel.roles.updated','panel_user',?,?)").bind(crypto.randomUUID(),auth.session.userId,member.user.id,JSON.stringify({roleIds})),
+    ];
+    await db.batch(statements);
     return NextResponse.json({success:true});
   } catch(error) {
     console.error("[staff access] PATCH failed:",error);
