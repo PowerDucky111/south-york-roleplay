@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
-import { getRoles } from "@/lib/discord";
+import { getGuildId, getRoles } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export async function GET() {
     return NextResponse.json({
       applicationTypes: types.results,
       roles: roles
-        .filter((role) => !role.managed && role.name !== "@everyone")
+        .filter((role) => !role.managed && role.id !== getGuildId())
         .map((role) => ({ id: role.id, name: role.name, position: role.position })),
     });
   } catch (error) {
@@ -65,7 +65,7 @@ export async function PATCH(request: NextRequest) {
 
     const roles = await getRoles();
     const selectedRole = roles.find((role) => role.id === body.discordRoleId);
-    if (!selectedRole || selectedRole.managed || selectedRole.name === "@everyone") {
+    if (!selectedRole || selectedRole.managed || selectedRole.id === getGuildId()) {
       return NextResponse.json({ error: "That Discord role is not available for whitelist assignment." }, { status: 400 });
     }
 
