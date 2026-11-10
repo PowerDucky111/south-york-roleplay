@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { requireAdminSession } from "@/lib/auth";
+import { requirePermissionSession } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { AppShell } from "@/components/app-shell";
 import { ApplicationReviewActions } from "@/components/application-review-actions";
@@ -24,7 +24,7 @@ const labels: Record<string, string> = {
 };
 
 export default async function StaffApplicationsPage() {
-  const session = await requireAdminSession();
+  const session = await requirePermissionSession("applications.manage");
   let applications: ApplicationRow[] = [];
   let error = "";
   try {
