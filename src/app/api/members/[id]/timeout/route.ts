@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { timeoutMember } from "@/lib/discord";
 import { notifyModeration } from "@/lib/moderation-notify";
 
 // PATCH /api/members/[id]/timeout  body: { durationMinutes: number }  (0 = remove timeout)
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("discord.moderate");
   if ("response" in auth) return auth.response;
 
   const { id } = await params;
