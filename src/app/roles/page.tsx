@@ -1,11 +1,11 @@
-import { requireAdminSession } from "@/lib/auth";
+import { requirePermissionSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { getMembers, getRoles, roleColor } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
 export default async function RolesPage() {
-  const session = await requireAdminSession();
+  const session = await requirePermissionSession("users.view");
 
   let roles: Awaited<ReturnType<typeof getRoles>> = [];
   let members: Awaited<ReturnType<typeof getMembers>> = [];
