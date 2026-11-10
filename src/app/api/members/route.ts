@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { getMembers, getRoles } from "@/lib/discord";
 
 // GET /api/members -> { members, roles }
 export async function GET() {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("users.view");
   if ("response" in auth) return auth.response;
 
   try {
