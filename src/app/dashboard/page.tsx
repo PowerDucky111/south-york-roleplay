@@ -1,12 +1,12 @@
 import Link from "next/link";
-import { requireAdminSession } from "@/lib/auth";
+import { requirePermissionSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { getGuild, getRoles, getBans, getMembers } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
 export default async function DashboardPage() {
-  const session = await requireAdminSession();
+  const session = await requirePermissionSession("admin.access");
 
   let guild = null;
   let roleCount = 0;
