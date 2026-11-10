@@ -57,6 +57,11 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: "This application has already been closed." }, { status: 409 });
     }
 
+    // Ensure the reviewing staff member exists for the reviewed_by foreign key.
+    await db.prepare(
+      "INSERT INTO panel_users (discord_user_id, username, avatar_hash) VALUES (?, ?, ?) ON CONFLICT(discord_user_id) DO UPDATE SET username = excluded.username, avatar_hash = excluded.avatar_hash, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ', 'now')"
+    ).bind(auth.session.userId, auth.session.username, auth.session.avatar).run();
+
     // Grant the configured Discord whitelist role before recording approval.
     // If Discord rejects the request, leave the application open for staff to retry.
     if (body.status === "approved") {
