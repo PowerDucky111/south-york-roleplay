@@ -79,6 +79,7 @@ export default async function DashboardPage() {
         <h2 className="mt-1 text-lg font-semibold text-white">Quick access</h2>
         <div className="mt-4 grid gap-4 md:grid-cols-3">
           <QuickLink href="/members" number="01" title="Discord members" body="Find community members, review accounts and manage server roles." />
+          <QuickLink href="/settings/applications" number="04" title="Application settings" body="Choose which Discord role is granted when an application is approved." />
           <QuickLink href="/roles" number="02" title="Discord roles" body="Review the server's role structure and role membership." />
           <QuickLink href="/moderation" number="03" title="Moderation" body="Review bans and manage moderation actions." />
         </div>
