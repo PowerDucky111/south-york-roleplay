@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { getGuildId, getRoles } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("applications.manage");
   if ("response" in auth) return auth.response;
 
   try {
@@ -37,7 +37,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("applications.manage");
   if ("response" in auth) return auth.response;
 
   const origin = request.headers.get("origin");
