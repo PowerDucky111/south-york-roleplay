@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdminApi } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
+import { addMemberRole } from "@/lib/discord";
 
 export const dynamic = "force-dynamic";
 
@@ -43,11 +44,37 @@ export async function PATCH(request: NextRequest) {
 
   try {
     const db = getDatabase();
-    const application = await db.prepare("SELECT id, status FROM applications WHERE id = ?")
-      .bind(body.applicationId).first<{ id: string; status: string }>();
+    const application = await db.prepare(
+      "SELECT a.id, a.status, a.applicant_discord_id, t.discord_role_id FROM applications a JOIN application_types t ON t.id = a.application_type_id WHERE a.id = ?"
+    ).bind(body.applicationId).first<{
+      id: string;
+      status: string;
+      applicant_discord_id: string;
+      discord_role_id: string | null;
+    }>();
     if (!application) return NextResponse.json({ error: "Application not found." }, { status: 404 });
     if (["approved", "rejected", "withdrawn"].includes(application.status)) {
       return NextResponse.json({ error: "This application has already been closed." }, { status: 409 });
+    }
+
+    // Grant the configured Discord whitelist role before recording approval.
+    // If Discord rejects the request, leave the application open for staff to retry.
+    if (body.status === "approved") {
+      if (!application.discord_role_id) {
+        return NextResponse.json(
+          { error: "No Discord whitelist role is configured for this application type. Configure its discord_role_id first." },
+          { status: 409 }
+        );
+      }
+      try {
+        await addMemberRole(application.applicant_discord_id, application.discord_role_id);
+      } catch (error) {
+        console.error("[admin applications] Discord whitelist role grant failed:", error);
+        return NextResponse.json(
+          { error: "Discord could not grant the whitelist role. Check the bot token, Manage Roles permission, and role hierarchy, then try again." },
+          { status: 502 }
+        );
+      }
     }
 
     await db.prepare(
