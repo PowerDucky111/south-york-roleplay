@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { banMember } from "@/lib/discord";
 import { notifyModeration } from "@/lib/moderation-notify";
 
 // PUT /api/members/[id]/ban  body: { deleteMessageSeconds?: number }
 export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("discord.moderate");
   if ("response" in auth) return auth.response;
 
   const { id } = await params;
