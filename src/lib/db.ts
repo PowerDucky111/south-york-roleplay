@@ -17,6 +17,7 @@ interface D1PreparedStatement {
 
 export interface D1Database {
   prepare(query: string): D1PreparedStatement;
+  batch<T = unknown>(statements: D1PreparedStatement[]): Promise<T[]>;
 }
 
 export function getDatabase(): D1Database {
