@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { getDatabase } from "@/lib/db";
 import { addMemberRole } from "@/lib/discord";
 
@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
 const ALLOWED_STATUSES = new Set(["in_review", "awaiting_information", "approved", "rejected"]);
 
 export async function GET() {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("applications.manage");
   if ("response" in auth) return auth.response;
   try {
     const db = getDatabase();
@@ -23,7 +23,7 @@ export async function GET() {
 }
 
 export async function PATCH(request: NextRequest) {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("applications.manage");
   if ("response" in auth) return auth.response;
   const origin = request.headers.get("origin");
   if (origin && origin !== request.nextUrl.origin) {
