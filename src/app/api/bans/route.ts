@@ -1,10 +1,10 @@
 import { NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { getBans } from "@/lib/discord";
 
 // GET /api/bans -> ban list
 export async function GET() {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("discord.moderate");
   if ("response" in auth) return auth.response;
 
   try {

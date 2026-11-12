@@ -1,4 +1,4 @@
-import { requireAdminSession } from "@/lib/auth";
+import { requirePermissionSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { BansTable } from "@/components/bans-table";
 import { getBans } from "@/lib/discord";
@@ -6,7 +6,7 @@ import { getBans } from "@/lib/discord";
 export const dynamic = "force-dynamic";
 
 export default async function ModerationPage() {
-  const session = await requireAdminSession();
+  const session = await requirePermissionSession("discord.moderate");
 
   let bans: Awaited<ReturnType<typeof getBans>> = [];
   let error: string | null = null;
