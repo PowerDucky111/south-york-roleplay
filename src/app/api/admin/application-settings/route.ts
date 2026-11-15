@@ -40,7 +40,7 @@ export async function PATCH(request: NextRequest) {
     if (typeof body.applicationsEnabled === "boolean") {
       await db.prepare("INSERT INTO system_settings (key, value, updated_at) VALUES ('whitelist_applications_enabled', ?, strftime('%Y-%m-%dT%H:%M:%fZ','now')) ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at")
         .bind(body.applicationsEnabled ? "1" : "0").run();
-      await db.prepare("INSERT INTO panel_users (discord_user_id, username, avatar_hash) VALUES (?, ?, ?) ON CONFLICT(discord_user_id) DO UPDATE SET username = excluded.username, avatar_hash = excluded.avatar_hash, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now'))")
+      await db.prepare("INSERT INTO panel_users (discord_user_id, username, avatar_hash) VALUES (?, ?, ?) ON CONFLICT(discord_user_id) DO UPDATE SET username = excluded.username, avatar_hash = excluded.avatar_hash, updated_at = strftime('%Y-%m-%dT%H:%M:%fZ','now')")
         .bind(auth.session.userId, auth.session.username, auth.session.avatar).run();
       return NextResponse.json({ success: true, applicationsEnabled: body.applicationsEnabled });
     }
