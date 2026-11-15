@@ -144,6 +144,14 @@ export async function addMemberRole(userId: string, roleId: string): Promise<voi
   );
 }
 
+// Sets the member's server nickname (requires Manage Nicknames).
+export async function updateMemberNickname(userId: string, nickname: string): Promise<void> {
+  await botFetch(`/guilds/${getGuildId()}/members/${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ nick: nickname.slice(0, 32) }),
+  });
+}
+
 export async function kickMember(userId: string): Promise<void> {
   await botFetch(`/guilds/${getGuildId()}/members/${userId}`, { method: "DELETE" });
 }
