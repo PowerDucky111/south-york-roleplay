@@ -16,6 +16,7 @@ interface ApplicationRow {
   created_at: string;
   application_type_name: string;
   applicant_username: string | null;
+  applicant_callsign: string | null;
 }
 
 const labels: Record<string, string> = {
@@ -29,7 +30,7 @@ export default async function StaffApplicationsPage() {
   let error = "";
   try {
     const result = await getDatabase().prepare(
-      "SELECT a.id, a.applicant_discord_id, a.status, a.answers_json, a.review_notes, a.submitted_at, a.created_at, t.name AS application_type_name, u.username AS applicant_username FROM applications a JOIN application_types t ON t.id = a.application_type_id LEFT JOIN panel_users u ON u.discord_user_id = a.applicant_discord_id ORDER BY CASE a.status WHEN 'submitted' THEN 0 WHEN 'in_review' THEN 1 WHEN 'awaiting_information' THEN 2 ELSE 3 END, a.created_at ASC"
+      "SELECT a.id, a.applicant_discord_id, a.status, a.answers_json, a.review_notes, a.submitted_at, a.created_at, t.name AS application_type_name, u.username AS applicant_username, u.callsign AS applicant_callsign FROM applications a JOIN application_types t ON t.id = a.application_type_id LEFT JOIN panel_users u ON u.discord_user_id = a.applicant_discord_id ORDER BY CASE a.status WHEN 'submitted' THEN 0 WHEN 'in_review' THEN 1 WHEN 'awaiting_information' THEN 2 ELSE 3 END, a.created_at ASC"
     ).all<ApplicationRow>();
     applications = result.results;
   } catch (err) {
@@ -45,7 +46,7 @@ export default async function StaffApplicationsPage() {
       <div className="mt-2 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight text-white">Application review</h1>
-          <p className="mt-2 text-sm text-slate-400">Review community applications and record your decisions.</p>
+          <p className="mt-2 text-sm text-slate-400">Review current and past community applications, including approved and rejected submissions.</p>
         </div>
         <div className="rounded-xl border border-blue-400/15 bg-blue-400/[0.07] px-4 py-3 text-sm text-blue-200">{pending} awaiting action</div>
       </div>
@@ -60,7 +61,7 @@ export default async function StaffApplicationsPage() {
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
                     <div>
                       <div className="eyebrow">{application.application_type_name}</div>
-                      <h2 className="mt-1 text-lg font-semibold text-white">{application.applicant_username ?? "Discord member"}</h2>
+                      <h2 className="mt-1 text-lg font-semibold text-white">{application.applicant_username ?? "Discord member"}{application.applicant_callsign ? " · " + application.applicant_callsign : ""}</h2>
                       <p className="mt-1 text-xs text-slate-500">Discord ID: {application.applicant_discord_id} · {application.submitted_at ? new Date(application.submitted_at).toLocaleString("en-GB") : "Submission date unavailable"}</p>
                     </div>
                     <span className="w-fit rounded-full border border-blue-300/15 bg-blue-300/[0.08] px-3 py-1.5 text-xs font-medium text-blue-200">{labels[application.status] ?? application.status}</span>
