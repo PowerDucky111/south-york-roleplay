@@ -34,11 +34,11 @@ export default async function ApplicationsPage() {
   const session = await requireSession();
   let types: ApplicationType[] = [];
   let applications: ApplicationRow[] = [];
-  let loadError = "";
+  let loadError = "";\n  let callsign: string | null = null;\n  let applicationsEnabled = true;
 
   try {
     const db = getDatabase();
-    const [typeResult, applicationResult] = await Promise.all([
+    const [typeResult, applicationResult, profile, setting] = await Promise.all([
       db.prepare("SELECT id, name, description, form_schema_json FROM application_types WHERE enabled = 1 ORDER BY sort_order ASC, name ASC").all<ApplicationType>(),
       db.prepare("SELECT a.id, a.status, a.submitted_at, a.created_at, t.name AS application_type_name FROM applications a JOIN application_types t ON t.id = a.application_type_id WHERE a.applicant_discord_id = ? ORDER BY a.created_at DESC").bind(session.userId).all<ApplicationRow>(),
     ]);
@@ -53,13 +53,13 @@ export default async function ApplicationsPage() {
     <AppShell session={session} mode="player">
       <div className="eyebrow">Community portal / Applications</div>
       <h1 className="mt-2 text-3xl font-bold tracking-tight text-white">My applications</h1>
-      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Apply to join South York Roleplay and follow the progress of your submissions.</p>
+      <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-400">Apply to join South York Roleplay and follow the progress of your submissions.</p>\n      {callsign && <div className="mt-4 inline-flex items-center gap-2 rounded-xl border border-blue-300/15 bg-blue-300/[0.06] px-4 py-3"><span className="text-xs text-slate-400">Your player callsign</span><strong className="text-lg tracking-wider text-blue-200">{callsign}</strong></div>}
 
       {loadError ? (
         <div role="alert" className="mt-8 rounded-xl border border-red-400/20 bg-red-400/10 p-4 text-sm text-red-200">{loadError}</div>
       ) : (
         <>
-          <section className="mt-8 panel-card p-6 sm:p-8">
+          {applicationsEnabled ? <section className="mt-8 panel-card p-6 sm:p-8">
             <div className="eyebrow">New submission</div>
             <h2 className="mt-2 text-xl font-semibold text-white">Start an application</h2>
             <p className="mb-6 mt-2 text-sm leading-6 text-slate-400">Complete the form below. Required questions are marked with an asterisk.</p>
