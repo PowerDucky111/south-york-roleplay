@@ -52,7 +52,8 @@ export async function GET(req: NextRequest) {
   // permissions are being moved into the portal database in a later stage.
   try {
     await getMember(user.id);
-  } catch {
+  } catch (error) {
+    console.error("[OAuth] Discord membership check failed:", error);
     return fail("not_member");
   }
 
