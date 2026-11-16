@@ -1,0 +1,11 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "d1_databases": [
+    {
+      "binding": "PREVIEW_DB",
+      "database_name": "syrp-community-test",
+      "database_id": "e1286ba2-80c1-4a39-a551-f95102329983",
+      "migrations_dir": "migrations"
+    }
+  ]
+}
