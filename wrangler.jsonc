@@ -26,6 +26,19 @@
 			"database_id": "1b1a7fff-8c7a-4144-91ca-6b3fdd1518db"
 		}
 	],
+	"observability": {
+		"enabled": true,
+		"logs": {
+			"enabled": true,
+    		"invocation_logs": true,
+    		"persist": true
+		},
+		"traces": {
+			"enabled": true,
+    		"head_sampling_rate": 1,
+    		"persist": true
+  		}
+	},
 	"images": {
 		// Enable image optimization
 		// see https://opennext.js.org/cloudflare/howtos/image
@@ -38,6 +51,7 @@
       		"database_name": "syrp-community-test",
       		"database_id": "e1286ba2-80c1-4a39-a551-f95102329983"
     	}
+	
   ]
 }
 }
