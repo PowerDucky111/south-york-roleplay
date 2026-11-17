@@ -21,7 +21,12 @@ export async function ensureMemberCallsign(
   const existing = await db.prepare(
     "SELECT callsign FROM panel_users WHERE discord_user_id = ?"
   ).bind(user.id).first<{ callsign: string | null }>();
-  if (existing?.callsign) return existing.callsign;
+  if (existing?.callsign) {
+    await db.prepare(
+      "INSERT OR IGNORE INTO panel_user_roles (discord_user_id, role_id) VALUES (?, 'player')"
+    ).bind(user.id).run();
+    return existing.callsign;
+  }
 
   for (let attempt = 0; attempt < 30; attempt++) {
     const callsign = randomCallsign();
@@ -38,7 +43,12 @@ export async function ensureMemberCallsign(
       const saved = await db.prepare(
         "SELECT callsign FROM panel_users WHERE discord_user_id = ?"
       ).bind(user.id).first<{ callsign: string | null }>();
-      if (saved?.callsign) return saved.callsign;
+      if (saved?.callsign) {
+        await db.prepare(
+          "INSERT OR IGNORE INTO panel_user_roles (discord_user_id, role_id) VALUES (?, 'player')"
+        ).bind(user.id).run();
+        return saved.callsign;
+      }
     } catch (error) {
       // A callsign collision is safe to retry because the D1 index is unique.
       if (attempt === 29) throw error;
