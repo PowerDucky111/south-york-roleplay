@@ -2,6 +2,18 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { getSession, type SessionPayload } from "./session";
 import { getGuild, getMember } from "./discord";
+
+export const MANAGEMENT_ROLE_ID = "1570946559372296202";
+
+export async function hasManagementRole(userId: string): Promise<boolean> {
+  try {
+    const member = await getMember(userId);
+    return member.roles.includes(MANAGEMENT_ROLE_ID);
+  } catch (error) {
+    console.error(`[auth] Management role check failed for ${userId}:`, error);
+    return false;
+  }
+}
 import { getDatabase } from "./db";
 
 const PERMISSION_ADMINISTRATOR = 1n << 3n;
@@ -18,7 +30,7 @@ export function isBootstrapAdmin(userId: string): boolean {
 
 // Legacy Discord-based check for routes not yet migrated.
 export async function isAdmin(userId: string): Promise<boolean> {
-  if (isBootstrapAdmin(userId)) return true;
+  if (isBootstrapAdmin(userId) || await hasManagementRole(userId)) return true;
   try {
     const guild = await getGuild();
     if (guild.owner_id === userId) return true;
@@ -33,7 +45,7 @@ export async function isAdmin(userId: string): Promise<boolean> {
 
 // Panel permissions are stored in D1 and are independent of Discord roles.
 export async function hasPermission(userId: string, permissionKey: string): Promise<boolean> {
-  if (isBootstrapAdmin(userId)) return true;
+  if (isBootstrapAdmin(userId) || await hasManagementRole(userId)) return true;
   try {
     const result = await getDatabase().prepare(
       "SELECT 1 AS allowed FROM panel_user_roles ur JOIN panel_permissions p ON p.role_id = ur.role_id WHERE ur.discord_user_id = ? AND p.permission_key = ? LIMIT 1"
