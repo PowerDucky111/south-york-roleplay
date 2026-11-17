@@ -56,3 +56,10 @@ export async function syncMemberNickname(
 ): Promise<void> {
   await updateMemberNickname(userId, callsignNickname(callsign, displayName));
 }
+
+export async function getCallsignMap(): Promise<Record<string, string>> {
+  const result = await getDatabase().prepare(
+    "SELECT discord_user_id, callsign FROM panel_users WHERE callsign IS NOT NULL"
+  ).all<{ discord_user_id: string; callsign: string }>();
+  return Object.fromEntries(result.results.map((row) => [row.discord_user_id, row.callsign]));
+}
