@@ -102,7 +102,7 @@ export function MemberTable({
             </option>
           ))}
         </select>
-        {isManagement && (\n          <button\n            onClick={() => runAction("sync", () => fetch("/api/members/sync", { method: "POST" }), "Member callsigns synchronised")}\n            disabled={busy !== null}\n            className="rounded-lg bg-discord-blurple px-4 py-2 text-sm font-semibold text-white hover:bg-[#4752c4] disabled:opacity-50"\n          >\n            {busy === "sync" ? "Synchronising…" : "Sync callsigns"}\n          </button>\n        )}\n        {isManagement && (
+        {isManagement && (
           <button
             onClick={() => runAction("sync", () => fetch("/api/members/sync", { method: "POST" }), "Member callsigns synchronised")}
             disabled={busy !== null}
