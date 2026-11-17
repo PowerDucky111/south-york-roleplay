@@ -21,15 +21,16 @@ export async function GET() {
   const session = await requireSession();
   try {
     const db = getDatabase();
-    const [types, applications] = await Promise.all([
+    const [types, applications, setting] = await Promise.all([
       db.prepare(
         "SELECT id, name, description, form_schema_json FROM application_types WHERE enabled = 1 ORDER BY sort_order ASC, name ASC"
       ).all<ApplicationTypeRow>(),
       db.prepare(
         "SELECT a.id, a.status, a.submitted_at, a.created_at, a.updated_at, t.name AS application_type_name FROM applications a JOIN application_types t ON t.id = a.application_type_id WHERE a.applicant_discord_id = ? ORDER BY a.created_at DESC"
       ).bind(session.userId).all(),
+      db.prepare("SELECT value FROM system_settings WHERE key = 'whitelist_applications_enabled'").first<{ value: string }>(),
     ]);
-    return NextResponse.json({ types: types.results, applications: applications.results });
+    return NextResponse.json({ types: setting?.value === "0" ? [] : types.results, applications: applications.results, applicationsEnabled: setting?.value !== "0" });
   } catch (error) {
     console.error("[applications] GET failed:", error);
     return NextResponse.json({ error: "Could not load applications. Please try again." }, { status: 500 });
@@ -61,6 +62,8 @@ export async function POST(request: NextRequest) {
 
   try {
     const db = getDatabase();
+    const setting = await db.prepare("SELECT value FROM system_settings WHERE key = 'whitelist_applications_enabled'").first<{ value: string }>();
+    if (setting?.value === "0") return NextResponse.json({ error: "Whitelist applications are currently closed. Please check back later." }, { status: 403 });
     const type = await db.prepare(
       "SELECT id, form_schema_json FROM application_types WHERE id = ? AND enabled = 1"
     ).bind(body.applicationTypeId).first<{ id: string; form_schema_json: string }>();
