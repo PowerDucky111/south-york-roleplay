@@ -10,7 +10,6 @@ export async function POST() {
   try {
     const members = await getMembers();
     let processed = 0;
-    let assigned = 0;
     let nicknamesUpdated = 0;
     let nicknameFailures = 0;
 
@@ -18,8 +17,6 @@ export async function POST() {
       if (!member.user || member.user.bot) continue;
       const existing = await ensureMemberCallsign(member.user, displayName(member));
       processed++;
-      // Count newly allocated callsigns by checking the existing member profile
-      // before this sync in the database is handled inside ensureMemberCallsign.
       try {
         await syncMemberNickname(member.user.id, existing, displayName(member));
         nicknamesUpdated++;
@@ -34,7 +31,7 @@ export async function POST() {
       membersProcessed: processed,
       nicknamesUpdated,
       nicknameFailures,
-      message: "Member callsign sync completed. Members above the bot's role may need manual nickname updates.",
+      message: `Sync complete: ${processed} members processed, ${nicknamesUpdated} nicknames updated, ${nicknameFailures} nickname updates failed. Leadership above the bot role may need manual updates.`,
     });
   } catch (error) {
     return NextResponse.json(
