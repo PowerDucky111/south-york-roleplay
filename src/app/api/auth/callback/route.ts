@@ -53,7 +53,15 @@ export async function GET(req: NextRequest) {
   try {
     await getMember(user.id);
   } catch (error) {
-    console.error("[OAuth] Discord membership check failed:", error);
+    const details =
+      error instanceof Error
+        ? `${error.name}: ${error.message}`
+        : String(error);
+
+    console.error(
+      `[OAuth] Discord membership check failed: ${details}`
+    );
+
     return fail("not_member");
   }
 
