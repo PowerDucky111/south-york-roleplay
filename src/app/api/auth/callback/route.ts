@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
 import { isAdmin } from "@/lib/auth";
-import { getMember } from "@/lib/discord";
+import { getMember, displayName } from "@/lib/discord";
+import { ensureMemberCallsign, syncMemberNickname } from "@/lib/callsign";
 import { appUrl } from "@/lib/utils";
 import type { DiscordUser } from "@/lib/discord";
 
@@ -50,8 +51,9 @@ export async function GET(req: NextRequest) {
 
   // The bot verifies that the account belongs to this community. Panel
   // permissions are being moved into the portal database in a later stage.
+  let guildMember;
   try {
-    await getMember(user.id);
+    guildMember = await getMember(user.id);
   } catch (error) {
     const details =
       error instanceof Error
@@ -63,6 +65,17 @@ export async function GET(req: NextRequest) {
     );
 
     return fail("not_member");
+  }
+
+  try {
+    const callsign = await ensureMemberCallsign(user, displayName(guildMember));
+    try {
+      await syncMemberNickname(user.id, callsign, displayName(guildMember));
+    } catch (error) {
+      console.warn(`[OAuth] Callsign ${callsign} saved for ${user.id}, but Discord nickname could not be updated:`, error);
+    }
+  } catch (error) {
+    console.error(`[OAuth] Could not provision callsign for ${user.id}:`, error);
   }
 
   await createSession(user);
