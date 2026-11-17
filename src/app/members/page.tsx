@@ -2,6 +2,8 @@ import { requirePermissionSession } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { MemberTable } from "@/components/member-table";
 import { getMembers, getRoles } from "@/lib/discord";
+import { hasManagementRole } from "@/lib/auth";
+import { getCallsignMap } from "@/lib/callsign";
 
 export const dynamic = "force-dynamic";
 
@@ -11,9 +13,11 @@ export default async function MembersPage() {
   let members: Awaited<ReturnType<typeof getMembers>> = [];
   let roles: Awaited<ReturnType<typeof getRoles>> = [];
   let error: string | null = null;
+  let callsigns: Record<string, string> = {};
+  const isManagement = await hasManagementRole(session.userId);
 
   try {
-    [members, roles] = await Promise.all([getMembers(), getRoles()]);
+    [members, roles, callsigns] = await Promise.all([getMembers(), getRoles(), getCallsignMap()]);
   } catch (err) {
     error = err instanceof Error ? err.message : "Failed to load members";
   }
