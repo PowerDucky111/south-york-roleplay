@@ -64,7 +64,7 @@ export function MemberTable({
       if (!res.ok) {
         setToast(data.error ?? "Action failed");
       } else {
-        setToast(successMsg);
+        setToast(data.warning ?? data.message ?? successMsg);
         setModal(null);
         router.refresh();
       }
@@ -98,7 +98,7 @@ export function MemberTable({
             </option>
           ))}
         </select>
-        <div className="text-sm text-discord-muted sm:ml-auto sm:self-center">
+        {isManagement && (\n          <button\n            onClick={() => runAction("sync", () => fetch("/api/members/sync", { method: "POST" }), "Member callsigns synchronised")}\n            disabled={busy !== null}\n            className="rounded-lg bg-discord-blurple px-4 py-2 text-sm font-semibold text-white hover:bg-[#4752c4] disabled:opacity-50"\n          >\n            {busy === "sync" ? "Synchronising…" : "Sync callsigns"}\n          </button>\n        )}\n        <div className="text-sm text-discord-muted sm:ml-auto sm:self-center">
           {filtered.length} of {members.length} members
         </div>
       </div>
@@ -122,7 +122,7 @@ export function MemberTable({
           <thead>
             <tr className="border-b border-white/5 bg-discord-panel/80 text-xs uppercase tracking-wide text-discord-muted">
               <th className="px-4 py-3 font-medium">Member</th>
-              <th className="hidden px-4 py-3 font-medium md:table-cell">Roles</th>
+              <th className="px-4 py-3 font-medium">Callsign</th>\n              <th className="hidden px-4 py-3 font-medium md:table-cell">Roles</th>
               <th className="hidden px-4 py-3 font-medium lg:table-cell">Joined</th>
               <th className="px-4 py-3 font-medium">Status</th>
               <th className="px-4 py-3 text-right font-medium">Actions</th>
