@@ -51,7 +51,7 @@ export async function GET(req: NextRequest) {
 
   // The bot verifies that the account belongs to this community. Panel
   // permissions are being moved into the portal database in a later stage.
-  let guildMember;
+  let guildMember: Awaited<ReturnType<typeof getMember>>;
   try {
     guildMember = await getMember(user.id);
   } catch (error) {
