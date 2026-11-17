@@ -1,8 +1,6 @@
 import { getDatabase } from "@/lib/db";
 import { updateMemberNickname, type DiscordUser } from "@/lib/discord";
 
-export const MANAGEMENT_ROLE_ID = "1570946559372296202";
-
 export function randomCallsign(): string {
   const values = new Uint32Array(1);
   crypto.getRandomValues(values);
