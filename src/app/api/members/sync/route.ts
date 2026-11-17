@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { requirePermissionApi } from "@/lib/auth";
 import { displayName, getMembers } from "@/lib/discord";
-import { ensureMemberCallsign, syncMemberNickname } from "@/lib/callsign";
+import { callsignNickname, ensureMemberCallsign, syncMemberNickname } from "@/lib/callsign";
 
 export async function POST() {
   const auth = await requirePermissionApi("system.manage");
@@ -18,8 +18,11 @@ export async function POST() {
       const existing = await ensureMemberCallsign(member.user, displayName(member));
       processed++;
       try {
-        await syncMemberNickname(member.user.id, existing, displayName(member));
-        nicknamesUpdated++;
+        const desiredNickname = callsignNickname(existing, displayName(member));
+        if (member.nick !== desiredNickname) {
+          await syncMemberNickname(member.user.id, existing, displayName(member));
+          nicknamesUpdated++;
+        }
       } catch (error) {
         nicknameFailures++;
         console.warn(`[callsign-sync] Could not update nickname for ${member.user.id}:`, error);
