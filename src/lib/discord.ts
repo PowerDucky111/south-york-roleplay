@@ -134,6 +134,24 @@ export async function updateMemberRoles(userId: string, roleIds: string[]): Prom
   });
 }
 
+// Adds one role without replacing any of the member's existing roles.
+// Discord requires the bot to have Manage Roles and the target role must be
+// below the bot's highest role in the server hierarchy.
+export async function addMemberRole(userId: string, roleId: string): Promise<void> {
+  await botFetch(
+    `/guilds/${getGuildId()}/members/${userId}/roles/${roleId}`,
+    { method: "PUT" }
+  );
+}
+
+// Sets the member's server nickname (requires Manage Nicknames).
+export async function updateMemberNickname(userId: string, nickname: string): Promise<void> {
+  await botFetch(`/guilds/${getGuildId()}/members/${userId}`, {
+    method: "PATCH",
+    body: JSON.stringify({ nick: nickname.slice(0, 32) }),
+  });
+}
+
 export async function kickMember(userId: string): Promise<void> {
   await botFetch(`/guilds/${getGuildId()}/members/${userId}`, { method: "DELETE" });
 }

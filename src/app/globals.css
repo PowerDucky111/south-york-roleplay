@@ -4,23 +4,43 @@
 
 :root {
   color-scheme: dark;
+  background: #0b1220;
+}
+
+html {
+  background: #0b1220;
 }
 
 body {
-  @apply bg-discord-darker text-discord-text antialiased;
+  @apply bg-[#0b1220] text-slate-100 antialiased;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(59, 130, 246, 0.35);
+  color: #fff;
 }
 
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 9px;
+  height: 9px;
 }
 ::-webkit-scrollbar-track {
-  background: #111214;
+  background: #0b1220;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1a1b1e;
-  border-radius: 6px;
+  background: #26354a;
+  border-radius: 8px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b2d31;
+  background: #38506d;
+}
+
+@layer components {
+  .panel-card {
+    @apply rounded-2xl border border-white/[0.07] bg-[#111d30] shadow-[0_12px_40px_rgba(0,0,0,0.12)];
+  }
+  .eyebrow {
+    @apply text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500;
+  }
 }

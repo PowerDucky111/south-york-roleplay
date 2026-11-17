@@ -6,13 +6,13 @@ const config: Config = {
     extend: {
       colors: {
         discord: {
-          blurple: "#5865F2",
-          dark: "#1e1f22",
-          darker: "#111214",
-          panel: "#2b2d31",
-          hover: "#35373c",
-          text: "#dbdee1",
-          muted: "#949ba4",
+          blurple: "#3B82F6",
+          dark: "#101a2b",
+          darker: "#0b1220",
+          panel: "#111d30",
+          hover: "#1a2a40",
+          text: "#e2e8f0",
+          muted: "#94a3b8",
         },
       },
     },

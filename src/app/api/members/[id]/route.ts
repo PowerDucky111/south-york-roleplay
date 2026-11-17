@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { requireAdminApi } from "@/lib/auth";
+import { requirePermissionApi } from "@/lib/auth";
 import { updateMemberRoles } from "@/lib/discord";
 
 // PATCH /api/members/[id]  body: { roles: string[] }
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
-  const auth = await requireAdminApi();
+  const auth = await requirePermissionApi("users.manage");
   if ("response" in auth) return auth.response;
 
   const { id } = await params;
