@@ -1,8 +1,7 @@
-import { requirePermissionSession } from "@/lib/auth";
+import { requirePermissionSession, hasManagementRole } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { MemberTable } from "@/components/member-table";
 import { getMembers, getRoles } from "@/lib/discord";
-import { hasManagementRole } from "@/lib/auth";
 import { getCallsignMap } from "@/lib/callsign";
 
 export const dynamic = "force-dynamic";
@@ -40,6 +39,8 @@ export default async function MembersPage() {
             members={members}
             roles={roles}
             currentUserId={session.userId}
+            callsigns={callsigns}
+            isManagement={isManagement}
           />
         </div>
       )}
