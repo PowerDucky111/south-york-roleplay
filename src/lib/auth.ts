@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { NextResponse } from "next/server";
 import { getSession, type SessionPayload } from "./session";
 import { getGuild, getMember } from "./discord";
+import { getDatabase } from "./db";
 
 export const MANAGEMENT_ROLE_ID = "1570946559372296202";
 
@@ -14,7 +15,6 @@ export async function hasManagementRole(userId: string): Promise<boolean> {
     return false;
   }
 }
-import { getDatabase } from "./db";
 
 const PERMISSION_ADMINISTRATOR = 1n << 3n;
 const PERMISSION_MANAGE_GUILD = 1n << 5n;
