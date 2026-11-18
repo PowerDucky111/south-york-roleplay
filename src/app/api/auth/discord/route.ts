@@ -4,6 +4,11 @@ import { appUrl } from "@/lib/utils";
 // Step 1 of Discord login: redirect the user to Discord's consent screen.
 export async function GET() {
   const clientId = process.env.DISCORD_CLIENT_ID;
+  console.log("[OAuth Debug]", {
+  clientIdExists: Boolean(clientId),
+  clientIdLength: clientId?.length ?? 0,
+  environment: process.env.NODE_ENV,
+  });
   if (!clientId) {
     return NextResponse.json(
       { error: "DISCORD_CLIENT_ID is not set (add it to .env.local locally, or to the Netlify environment variables when deployed)" },
@@ -12,7 +17,7 @@ export async function GET() {
   }
 
   const state = crypto.randomUUID();
-  const redirectUri = process.env.DISCORD_REDIRECT_URI ?? `${appUrl()}/api/auth/callback`;
+  const redirectUri = process.env.DISCORD_REDIRECT_URL ?? `${appUrl()}/api/auth/callback`;
 
   const url = new URL("https://discord.com/api/oauth2/authorize");
   url.searchParams.set("client_id", clientId);
