@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-  const redirectUri = process.env.DISCORD_REDIRECT_URI ?? `${appUrl()}/api/auth/callback`;
+  const redirectUri = process.env.DISCORD_REDIRECT_URL ?? `${appUrl()}/api/auth/callback`;
   if (!clientId || !clientSecret) {
     return fail("missing_oauth_config");
   }
