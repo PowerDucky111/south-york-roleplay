@@ -2,6 +2,7 @@
 	"$schema": "node_modules/wrangler/config-schema.json",
 	"main": ".open-next/worker.js",
 	"name": "south-york-roleplay",
+	"preview_urls": true,
 	"compatibility_date": "2026-11-08",
 	"compatibility_flags": [
 		"nodejs_compat",
@@ -45,13 +46,19 @@
 		"binding": "IMAGES"
 	},
 	"previews": {
-  	"d1_databases": [
-    	{
+  		"vars": {
+    		"DISCORD_REDIRECT_URL": "https://feature-discord-callsign-management-south-york-roleplay.sorleych4.workers.dev/api/auth/callback"
+  		},
+  		"d1_databases": [
+		{
       		"binding": "DB",
       		"database_name": "syrp-community-test",
       		"database_id": "e1286ba2-80c1-4a39-a551-f95102329983"
     	}
-	
-  ]
+  	],
+  	"images": {
+    	"binding": "IMAGES"
+  	}
 }
+
 }
