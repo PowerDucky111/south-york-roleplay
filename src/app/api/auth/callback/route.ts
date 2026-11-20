@@ -55,7 +55,7 @@ export async function GET(req: NextRequest) {
   try {
     guildMember = await getMember(user.id);
   } catch (error) {
-    const details =
+    const details =                                                                                             
       error instanceof Error
         ? `${error.name}: ${error.message}`
         : String(error);
@@ -63,17 +63,15 @@ export async function GET(req: NextRequest) {
     console.error(
       `[OAuth] Discord membership check failed: ${details}`
     );
-
+                      
     return fail("not_member");
   }
 
+try {
+  const callsign = await ensureMemberCallsign(user, displayName(guildMember));
+
   try {
-    const callsign = await ensureMemberCallsign(user, displayName(guildMember));
-    try {
-      await syncMemberNickname(user.id, callsign, displayName(guildMember));
-    } catch (error) {
-      console.warn(`[OAuth] Callsign ${callsign} saved for ${user.id}, but Discord nickname could not be updated:`, error);
-    }
+    await syncMemberNickname(user.id, callsign, displayName(guildMember));
   } catch (error) {
     console.warn("[OAuth] Discord nickname update failed:", {
       userId: user.id,
@@ -82,6 +80,9 @@ export async function GET(req: NextRequest) {
       errorMessage: error instanceof Error ? error.message : String(error),
     });
   }
+} catch (error) {
+  console.error(`[OAuth] Could not provision callsign for ${user.id}:`, error);
+}
 
   await createSession(user);
   const admin = await isAdmin(user.id);
