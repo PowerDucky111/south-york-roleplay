@@ -1,4 +1,4 @@
-import { requirePermissionSession, hasManagementRole } from "@/lib/auth";
+import { requirePermissionSession, hasPermission } from "@/lib/auth";
 import { AppShell } from "@/components/app-shell";
 import { MemberTable } from "@/components/member-table";
 import { getMembers, getRoles } from "@/lib/discord";
@@ -13,7 +13,7 @@ export default async function MembersPage() {
   let roles: Awaited<ReturnType<typeof getRoles>> = [];
   let error: string | null = null;
   let callsigns: Record<string, string> = {};
-  const isManagement = await hasManagementRole(session.userId);
+  const isManagement = await hasPermission(session.userId, "system.manage");
 
   try {
     [members, roles, callsigns] = await Promise.all([getMembers(), getRoles(), getCallsignMap()]);
