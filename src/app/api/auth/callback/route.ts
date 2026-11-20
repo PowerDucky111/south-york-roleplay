@@ -75,7 +75,12 @@ export async function GET(req: NextRequest) {
       console.warn(`[OAuth] Callsign ${callsign} saved for ${user.id}, but Discord nickname could not be updated:`, error);
     }
   } catch (error) {
-    console.error(`[OAuth] Could not provision callsign for ${user.id}:`, error);
+    console.warn("[OAuth] Discord nickname update failed:", {
+      userId: user.id,
+      callsign,
+      errorName: error instanceof Error ? error.name : "Unknown",
+      errorMessage: error instanceof Error ? error.message : String(error),
+    });
   }
 
   await createSession(user);
