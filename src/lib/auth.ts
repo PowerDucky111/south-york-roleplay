@@ -43,18 +43,23 @@ export async function isAdmin(userId: string): Promise<boolean> {
   }
 }
 
-// Panel permissions are stored in D1 and are independent of Discord roles.
+// D1 is the primary source of panel permissions. The Discord management-role
+// fallback is intentionally retained during migration so existing managers
+// do not lose access before their D1 assignments have been verified.
 export async function hasPermission(userId: string, permissionKey: string): Promise<boolean> {
-  if (isBootstrapAdmin(userId) || await hasManagementRole(userId)) return true;
+  if (isBootstrapAdmin(userId)) return true;
+
   try {
     const result = await getDatabase().prepare(
       "SELECT 1 AS allowed FROM panel_user_roles ur JOIN panel_permissions p ON p.role_id = ur.role_id WHERE ur.discord_user_id = ? AND p.permission_key = ? LIMIT 1"
     ).bind(userId, permissionKey).first<{ allowed: number }>();
-    return Boolean(result);
+    if (result) return true;
   } catch (error) {
-    console.error(`[auth] Permission check failed for ${userId} (${permissionKey}):`, error);
-    return false;
+    console.error(`[auth] D1 permission check failed for ${userId} (${permissionKey}):`, error);
   }
+
+  // Temporary compatibility path for existing Discord management-role holders.
+  return hasManagementRole(userId);
 }
 
 export async function requirePermissionSession(permissionKey: string): Promise<SessionPayload> {
