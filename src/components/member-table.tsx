@@ -186,7 +186,7 @@ export function MemberTable({
                         <ActionButton
                           label={callsigns[userId] ? "Edit" : "Assign"}
                           onClick={() => {
-                            const next = window.prompt("Enter a 3- or 4-digit callsign:", callsigns[userId] ?? "");
+                            const next = window.prompt("Enter a callsign: 1–4 numbers followed by 1–3 letters (e.g. 101GX):", callsigns[userId] ?? "");
                             if (next === null) return;
                             runAction(
                               `callsign-${userId}`,
