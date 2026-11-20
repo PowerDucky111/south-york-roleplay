@@ -13,9 +13,12 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json().catch(() => null);
-  const callsign = String(body?.callsign ?? "").trim();
-  if (!/^\d{3,4}$/.test(callsign)) {
-    return NextResponse.json({ error: "Callsign must be a 3- or 4-digit number." }, { status: 400 });
+  const callsign = String(body?.callsign ?? "").trim().toUpperCase();
+  if (!/^\\d{1,4}[A-Z]{1,3}$/.test(callsign)) {
+    return NextResponse.json(
+      { error: "Callsign must contain 1–4 numbers followed by 1–3 letters (for example, 101GX)." },
+      { status: 400 }
+    );
   }
 
   try {
@@ -51,7 +54,7 @@ export async function PATCH(
     const message = error instanceof Error ? error.message : "Failed to assign callsign";
     const conflict = /unique constraint|idx_panel_users_callsign/i.test(message);
     return NextResponse.json(
-      { error: conflict ? "That callsign is already assigned. Choose another number." : message },
+      { error: conflict ? "That callsign is already assigned. Choose another callsign." : message },
       { status: conflict ? 409 : 502 }
     );
   }
