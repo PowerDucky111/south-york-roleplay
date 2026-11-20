@@ -1,14 +1,20 @@
 import { getDatabase } from "@/lib/db";
 import { updateMemberNickname, type DiscordUser } from "@/lib/discord";
 
+const LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+// Generate a unique-format collar ID such as 101GX (3 digits + 2 letters).
 export function randomCallsign(): string {
-  const values = new Uint32Array(1);
+  const values = new Uint32Array(2);
   crypto.getRandomValues(values);
-  return String(100 + (values[0] % 9900));
+  const number = 100 + (values[0] % 900);
+  const first = LETTERS[values[1] % LETTERS.length];
+  const second = LETTERS[(Math.floor(values[1] / LETTERS.length)) % LETTERS.length];
+  return `${number}${first}${second}`;
 }
 
 export function callsignNickname(callsign: string, displayName: string): string {
-  const cleanName = displayName.replace(/^\[\d{3,4}\]\s*/, "").trim() || "Member";
+  const cleanName = displayName.replace(/^\\[\\d{1,4}[A-Z]{1,3}\\]\\s*/i, "").trim() || "Member";
   const prefix = `[${callsign}] `;
   return prefix + cleanName.slice(0, Math.max(0, 32 - prefix.length));
 }
