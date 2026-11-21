@@ -14,7 +14,7 @@ export function randomCallsign(): string {
 }
 
 export function callsignNickname(callsign: string, displayName: string): string {
-  const cleanName = displayName.replace(/^\\[\\d{1,4}[A-Z]{0,3}\\]\\s*/i, "").trim() || "Member";
+  const cleanName = displayName.replace(/^\[\d{1,4}[A-Z]{0,3}\]\s*/i, "").trim() || "Member";
   const prefix = `[${callsign}] `;
   return prefix + cleanName.slice(0, Math.max(0, 32 - prefix.length));
 }
