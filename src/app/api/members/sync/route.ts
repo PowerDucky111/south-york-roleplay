@@ -3,6 +3,10 @@ import { requirePermissionApi } from "@/lib/auth";
 import { displayName, getMembers } from "@/lib/discord";
 import { callsignNickname, ensureMemberCallsign, syncMemberNickname } from "@/lib/callsign";
 
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
+}
+
 export async function POST() {
   const auth = await requirePermissionApi("system.manage");
   if ("response" in auth) return auth.response;
@@ -11,7 +15,9 @@ export async function POST() {
     const members = await getMembers();
     let processed = 0;
     let nicknamesUpdated = 0;
+    let nicknamesAlreadyCorrect = 0;
     let nicknameFailures = 0;
+    const failureDetails: { userId: string; reason: string }[] = [];
 
     for (const member of members) {
       if (!member.user || member.user.bot) continue;
@@ -22,10 +28,16 @@ export async function POST() {
         if (member.nick !== desiredNickname) {
           await syncMemberNickname(member.user.id, existing, displayName(member));
           nicknamesUpdated++;
+        } else {
+          nicknamesAlreadyCorrect++;
         }
       } catch (error) {
         nicknameFailures++;
-        console.warn(`[callsign-sync] Could not update nickname for ${member.user.id}:`, error);
+        const reason = errorMessage(error);
+        console.warn(`[callsign-sync] Nickname update failed for ${member.user.id}: ${reason}`);
+        if (failureDetails.length < 25) {
+          failureDetails.push({ userId: member.user.id, reason });
+        }
       }
     }
 
@@ -33,12 +45,16 @@ export async function POST() {
       ok: true,
       membersProcessed: processed,
       nicknamesUpdated,
+      nicknamesAlreadyCorrect,
       nicknameFailures,
-      message: `Sync complete: ${processed} members processed, ${nicknamesUpdated} nicknames updated, ${nicknameFailures} nickname updates failed. Leadership above the bot role may need manual updates.`,
+      nicknameFailureDetails: failureDetails,
+      message: `Sync complete: ${processed} members processed, ${nicknamesUpdated} nicknames updated, ${nicknamesAlreadyCorrect} already correct, ${nicknameFailures} nickname updates failed.`,
     });
   } catch (error) {
+    const message = errorMessage(error);
+    console.error(`[callsign-sync] Member sync failed: ${message}`);
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Member sync failed" },
+      { error: message },
       { status: 502 }
     );
   }
