@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getSession } from "@/lib/session";
-import { isAdmin } from "@/lib/auth";
+import { hasPermission } from "@/lib/auth";
 
 const ERROR_MESSAGES: Record<string, string> = {
   invalid_state: "Your login session expired. Please try again.",
@@ -18,7 +18,7 @@ export default async function Home({
 }) {
   const { error } = await searchParams;
   const session = await getSession();
-  const admin = session ? await isAdmin(session.userId) : false;
+  const admin = session ? await hasPermission(session.userId, "admin.access") : false;
 
   return (
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#0b1220] px-5 py-16">

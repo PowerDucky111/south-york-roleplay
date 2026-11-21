@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cookies } from "next/headers";
 import { createSession } from "@/lib/session";
-import { isAdmin } from "@/lib/auth";
-import { getMember } from "@/lib/discord";
+import { hasPermission } from "@/lib/auth";
+import { getMember, displayName } from "@/lib/discord";
+import { ensureMemberCallsign, syncMemberNickname } from "@/lib/callsign";
 import { appUrl } from "@/lib/utils";
 import type { DiscordUser } from "@/lib/discord";
 
@@ -22,7 +23,7 @@ export async function GET(req: NextRequest) {
 
   const clientId = process.env.DISCORD_CLIENT_ID;
   const clientSecret = process.env.DISCORD_CLIENT_SECRET;
-  const redirectUri = process.env.DISCORD_REDIRECT_URI ?? `${appUrl()}/api/auth/callback`;
+  const redirectUri = process.env.DISCORD_REDIRECT_URL ?? `${appUrl()}/api/auth/callback`;
   if (!clientId || !clientSecret) {
     return fail("missing_oauth_config");
   }
@@ -48,25 +49,34 @@ export async function GET(req: NextRequest) {
   if (!userRes.ok) return fail("profile_fetch_failed");
   const user = (await userRes.json()) as DiscordUser;
 
-  // The bot verifies that the account belongs to this community. Panel
-  // permissions are being moved into the portal database in a later stage.
+  // The bot verifies guild membership. Panel authorization is managed in D1.
+  let guildMember: Awaited<ReturnType<typeof getMember>>;
   try {
-    await getMember(user.id);
+    guildMember = await getMember(user.id);
   } catch (error) {
-    const details =
-      error instanceof Error
-        ? `${error.name}: ${error.message}`
-        : String(error);
-
-    console.error(
-      `[OAuth] Discord membership check failed: ${details}`
-    );
-
+    const details = error instanceof Error ? `${error.name}: ${error.message}` : String(error);
+    console.error(`[OAuth] Discord membership check failed: ${details}`);
     return fail("not_member");
   }
 
+  try {
+    const callsign = await ensureMemberCallsign(user, displayName(guildMember));
+    try {
+      await syncMemberNickname(user.id, callsign, displayName(guildMember));
+    } catch (error) {
+      console.warn("[OAuth] Discord nickname update failed:", {
+        userId: user.id,
+        callsign,
+        errorName: error instanceof Error ? error.name : "Unknown",
+        errorMessage: error instanceof Error ? error.message : String(error),
+      });
+    }
+  } catch (error) {
+    console.error(`[OAuth] Could not provision callsign for ${user.id}:`, error);
+  }
+
   await createSession(user);
-  const admin = await isAdmin(user.id);
+  const admin = await hasPermission(user.id, "admin.access");
   const res = NextResponse.redirect(`${appUrl()}${admin ? "/dashboard" : "/portal"}`);
   res.cookies.delete("oauth_state");
   return res;

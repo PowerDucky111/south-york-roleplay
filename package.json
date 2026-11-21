@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "private": true,
   "description": "Community management system for South York Roleplay",
-  "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint"
+"scripts": {
+  "dev": "next dev",
+  "build": "next build",
+  "cf:build": "opennextjs-cloudflare build",
+  "preview": "opennextjs-cloudflare build && opennextjs-cloudflare preview",
+  "deploy": "opennextjs-cloudflare build && wrangler deploy",
+  "start": "next start",
+  "lint": "next lint"
   },
   "dependencies": {
     "@opennextjs/cloudflare": "^1.20.16",

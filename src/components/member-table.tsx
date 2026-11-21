@@ -23,10 +23,14 @@ export function MemberTable({
   members,
   roles,
   currentUserId,
+  callsigns,
+  isManagement,
 }: {
   members: GuildMember[];
   roles: DiscordRole[];
   currentUserId: string;
+  callsigns: Record<string, string>;
+  isManagement: boolean;
 }) {
   const router = useRouter();
   const [query, setQuery] = useState("");
@@ -64,7 +68,7 @@ export function MemberTable({
       if (!res.ok) {
         setToast(data.error ?? "Action failed");
       } else {
-        setToast(successMsg);
+        setToast(data.warning ?? data.message ?? successMsg);
         setModal(null);
         router.refresh();
       }
@@ -98,6 +102,15 @@ export function MemberTable({
             </option>
           ))}
         </select>
+        {isManagement && (
+          <button
+            onClick={() => runAction("sync", () => fetch("/api/members/sync", { method: "POST" }), "Member callsigns synchronised")}
+            disabled={busy !== null}
+            className="rounded-lg bg-discord-blurple px-4 py-2 text-sm font-semibold text-white hover:bg-[#4752c4] disabled:opacity-50"
+          >
+            {busy === "sync" ? "Synchronising…" : "Sync callsigns"}
+          </button>
+        )}
         <div className="text-sm text-discord-muted sm:ml-auto sm:self-center">
           {filtered.length} of {members.length} members
         </div>
@@ -122,6 +135,7 @@ export function MemberTable({
           <thead>
             <tr className="border-b border-white/5 bg-discord-panel/80 text-xs uppercase tracking-wide text-discord-muted">
               <th className="px-4 py-3 font-medium">Member</th>
+              <th className="px-4 py-3 font-medium">Callsign</th>
               <th className="hidden px-4 py-3 font-medium md:table-cell">Roles</th>
               <th className="hidden px-4 py-3 font-medium lg:table-cell">Joined</th>
               <th className="px-4 py-3 font-medium">Status</th>
@@ -163,6 +177,29 @@ export function MemberTable({
                           {m.user?.bot && " · bot"}
                         </div>
                       </div>
+                    </div>
+                  </td>
+                  <td className="px-4 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-semibold text-sky-300">{callsigns[userId] ? `[${callsigns[userId]}]` : "—"}</span>
+                      {isManagement && (
+                        <ActionButton
+                          label={callsigns[userId] ? "Edit" : "Assign"}
+                          onClick={() => {
+                            const next = window.prompt("Enter a callsign: 1–4 numbers followed by 1–3 letters (e.g. 101GX):", callsigns[userId] ?? "");
+                            if (next === null) return;
+                            runAction(
+                              `callsign-${userId}`,
+                              () => fetch(`/api/members/${userId}/callsign`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ callsign: next.trim() }),
+                              }),
+                              `Callsign updated for ${displayName(m)}`
+                            );
+                          }}
+                        />
+                      )}
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 md:table-cell">
