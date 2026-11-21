@@ -14,7 +14,7 @@ export async function PATCH(
   const { id } = await params;
   const body = await req.json().catch(() => null);
   const callsign = String(body?.callsign ?? "").trim().toUpperCase();
-  if (!/^\\d{1,4}[A-Z]{1,3}$/.test(callsign)) {
+  if (!/^\d{1,4}[A-Z]{1,3}$/.test(callsign)) {
     return NextResponse.json(
       { error: "Callsign must contain 1–4 numbers followed by 1–3 letters (for example, 101GX)." },
       { status: 400 }
@@ -42,7 +42,7 @@ export async function PATCH(
       await syncMemberNickname(id, callsign, displayName(member));
       return NextResponse.json({ ok: true, callsign, discordSynced: true });
     } catch (error) {
-      console.warn(`[callsign] Saved ${callsign} for ${id}, but Discord nickname update failed:`, error);
+      console.warn(`[callsign] Saved ${callsign} for ${id}, but Discord nickname update failed: ${error instanceof Error ? error.message : String(error)}`);
       return NextResponse.json({
         ok: true,
         callsign,
